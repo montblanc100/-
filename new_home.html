@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אתר החידונים על סדרת דופליקטים</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap');
+
+        :root {
+            --main-color: #008080;
+            --text-color: #f6f9f9;
+            --accent-color: red;
+        }
+
+        body {
+            font-family: 'Heebo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('images/צילום\ מסך\ 2025-04-17\ 131825.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            overflow-x: hidden;
+        }
+
+        /* שכבת אפקט קסום */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, #4a0072(0, 128, 128, 0.15) 0%, transparent 70%),
+                radial-gradient(circle at 80% 10%, #4a0072(0, 128, 128, 0.1) 0%, transparent 60%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* אנימציית חלקיקים מרחפים */
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            background-color: #4a0072;
+            box-shadow: 0 0 15px #9d00ff;
+            border: 1px solid #9d00ff;
+            color: white;
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+            box-shadow: 0 10px 25px rgba(0, 128, 128, 0.4);
+        }
+
+        /* אפקט זוהר בכותרת */
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(0, 128, 128, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* עיצוב דף עדכונים כמו ווצאפ */
+        .updates-container {
+            background-color: rgba(74, 0, 114, 0.9);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid #9d00ff;
+            box-shadow: 0 0 15px #9d00ff;
+            margin-bottom: 3rem;
+            overflow: hidden;
+        }
+
+        .update-item {
+            display: flex;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(157, 0, 255, 0.3);
+            transition: background-color 0.3s ease;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .update-item:hover {
+            background-color: rgba(157, 0, 255, 0.1);
+        }
+
+        .update-item:last-child {
+            border-bottom: none;
+        }
+
+        .update-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #9d00ff, #4a0072);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(157, 0, 255, 0.3);
+        }
+
+        .update-content {
+            flex: 1;
+        }
+
+        .update-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .update-title {
+            font-weight: bold;
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+
+        .update-time {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+
+        .update-text {
+            color: var(--text-color);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .update-badge {
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 12px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        /* סמן קסום */
+        .magic-cursor {
+            width: 30px;
+            height: 30px;
+            border: 2px solid rgba(0, 128, 128, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, border-color 0.2s;
+            backdrop-filter: blur(2px);
+            display: none;
+        }
+
+        footer {
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 1;
+            background-color: #4a0072;
+            box-shadow: 0 0 15px #9d00ff;
+            border: 1px solid #9d00ff;
+            clip-path: polygon(0% 30%, 50% 0%, 100% 30%, 100% 100%, 0% 100%);
+            padding-top: 5rem;
+        }
+
+        footer a {
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* אפקט קונפטי */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotateZ(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotateZ(720deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes confetti-side-left {
+            0% {
+                transform: translateX(-100px) translateY(0) rotateZ(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(100vw) translateY(50vh) rotateZ(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes confetti-side-right {
+            0% {
+                transform: translateX(100px) translateY(0) rotateZ(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-100vw) translateY(50vh) rotateZ(-360deg);
+                opacity: 0;
+            }
+        }
+
+        /* תמיכה במסכים קטנים */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .update-item {
+                padding: 1rem;
+            }
+
+            .update-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        .submission-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--purple-glow);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(157, 0, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .submission-email {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            background: rgba(157, 0, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+            border: 1px solid rgba(157, 0, 255, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- אלמנט מצביע קסום -->
+    <div class="magic-cursor"></div>
+
+    <div class="header">
+        <a href="home.html">
+            <h1>דף העדכונים של האתר.</h1>
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="updates-container">
+            <a href="mailto:harry.nc38@gmail.com?subject=%D7%90%D7%AA%D7%A8%20%D7%93%D7%95%D7%A4%D7%9C%D7%99%D7%A7%D7%98%D7%99%D7%9D">
+                <div class="update-item">
+                    <div class="update-avatar">🙏</div>
+                    <div class="update-content">
+                        <div class="update-header">
+                            <span class="update-badge">בקשה ממנו:</span>
+                            <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                            <div class="update-time"> חשוון תשפ"ו</div>
+                        </div>
+                        <p class="update-text">
+                        <h4 class="submission-title">
+                            משתמש יקר!
+                            <br>
+                            אנא קרא את זה ! :
+                        </h4>
+                        <p class="submission-description">
+                            אנו עושים מאמצים כדי לתת לכם את מירב הסיפוק והכיף והתוכן. <br>
+                            על כן נשמח לפידקבקים תגובות ושיתופים , ניתן גם לשלוח מאמרים, חידונים בטופסי פרומס, ותמונות
+                            מיוחדות
+                            בAI .
+                            <br> הכל למייל הזה:
+                        </p>
+                        <div class="submission-email">
+                            harry.nc38@gmail.com
+                        </div>
+                        </p>
+                    </div>
+                </div>
+            </a>
+            <a href="מילון מונחים 2.html">
+                <div class="update-item">
+                    <div class="update-avatar">🎉</div>
+                    <div class="update-content">
+                        <div class="update-header">
+                            <span class="update-badge">חדש!</span>
+                            <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                            <div class="update-time"> חשוון תשפ"ו</div>
+                        </div>
+                        <p class="update-text">מילון מונחים חלק ב עלה לאתר! תודה רבה ל- @cn</p>
+                    </div>
+                </div>
+            </a>
+            <div class="update-item">
+                <div class="update-avatar">🌐</div>
+                <div class="update-content">
+                    <div class="update-header">
+                        <span class="update-badge">עדכון באתר </span>
+                        <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                        <div class="update-time"> חשוון תשפ"ו</div>
+                    </div>
+                    <p class="update-text">מעתה לחיצה על ההודעה כאן, תעביר אתכם אל מה שמדובר בהודעה.!</p>
+                </div>
+            </div>
+            <a href="index.html">
+                <div class="update-item">
+                    <div class="update-avatar">🌐</div>
+                    <div class="update-content">
+                        <div class="update-header">
+                            <span class="update-badge">עיצוב האתר </span>
+                            <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                            <div class="update-time"> חשוון תשפ"ו</div>
+                        </div>
+                        <p class="update-text">מעתה הכניסה לדף העדכונים בעיגול בצד באתר!</p>
+                    </div>
+                </div>
+            </a>
+            <div class="update-item">
+                <div class="update-avatar">🎉</div>
+                <div class="update-content">
+                    <div class="update-header">
+                        <span class="update-badge">🎉 </span>
+                        <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                        <div class="update-time"> חשוון תשפ"ו</div>
+                    </div>
+                    <p class="update-text">מאמר מיוחד מאת י. ספיר בעצמה על לאתר!!! רוצו לקרוא!!</p>
+                </div>
+            </div>
+            <div class="update-item">
+                <div class="update-avatar">🎉</div>
+                <div class="update-content">
+                    <div class="update-header">
+                        <span class="update-badge">בקרוב </span>
+                        <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                        <div class="update-time">ז' תשרי תשפ"ו</div>
+                    </div>
+                    <p class="update-text">בקרוב ממש יעלה לאתר מילון המונחים על חלק ב׳!</p>
+                </div>
+            </div>
+            <div class="update-item">
+                <div class="update-avatar">🖼️</div>
+                <div class="update-content">
+                    <div class="update-header">
+                        <span class="update-badge">חדש</span>
+                        <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                        <div class="update-time">ז' תשרי תשפ"ו</div>
+                    </div>
+                    <p class="update-text"> תמונות חדשות נוספו למדור התמונות!!!</p>
+                </div>
+            </div>
+            <div class="update-item">
+                <div class="update-avatar">🎯</div>
+                <div class="update-content">
+                    <div class="update-header">
+                        <span class="update-badge">חדש</span>
+                        <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                        <div class="update-time">ז' תשרי תשפ"ו</div>
+                    </div>
+                    <p class="update-text">חידון חדש , רמה :קשה , מאת : רשב"י , חלק 1 , באו ונראה כמה אתם ראויים להיות
+                        דופליקטים!</p>
+                </div>
+            </div>
+            <div class="update-item">
+                <div class="update-avatar">🗞️</div>
+                <div class="update-content">
+                    <div class="update-header">
+                        <span class="update-badge">עדכון באתר</span>
+                        <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                        <div class="update-time">ג' תשרי תשפ"ו</div>
+                    </div>
+                    <p class="update-text">ניתן לשלוח מאמרים לאתר! הסתכלו בתיבת המאמרים!</p>
+                </div>
+            </div>
+            <div class="update-item">
+                <div class="update-avatar">🎯</div>
+                <div class="update-content">
+                    <div class="update-header">
+                        <div class="update-title">
+                            <span class="update-badge">חדש</span>
+                            חידון חדש נוסף לאתר!
+                        </div>
+                        <div class="update-time">ב' תשרי תשפ"ו</div>
+                    </div>
+                    <p class="update-text">נוסף חידון כללי חדש בדרגת קושי בינוני מאת "מאסטר הדופליקטים" - בואו לנסות
+                        ולראות אם אתם מכירים את הסדרה טוב מספיק!</p>
+                </div>
+            </div>
+
+            <div class="update-item">
+                <div class="update-avatar">🔥</div>
+                <div class="update-content">
+                    <div class="update-header">
+                        <span class="update-badge">עדכון באתר</span>
+                        <!-- <div class="update-title">חידון חדש נוסף לאתר!</div> -->
+                        <div class="update-time">ב' תשרי תשפ"ו</div>
+                    </div>
+                    <p class="update-text">הושק דף עידכונים לתוכן חדש באתר!</p>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <a href="https://www.prog.co.il/members/%D7%90%D7%95%D7%94%D7%93-%D7%94ai.131727/">
+        <footer>
+            © 2025 אתר החידונים על סדרת דופליקטים - כל הזכויות שמורות
+        </footer>
+    </a>
+
+    <script>
+        // יצירת אפקט קונפטי
+        function createConfetti(fromSides = false) {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+            const confettiCount = fromSides ? 30 : 50;
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+
+                const piece = document.createElement('div');
+                piece.classList.add('confetti-piece');
+
+                // צבע אקראי
+                piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+                // גודל אקראי
+                const size = Math.random() * 8 + 4;
+                confetti.style.width = size + 'px';
+                confetti.style.height = size + 'px';
+
+                if (fromSides) {
+                    // קונפטי מהצדדים
+                    const isFromLeft = Math.random() > 0.5;
+                    const startY = Math.random() * window.innerHeight * 0.3;
+
+                    if (isFromLeft) {
+                        confetti.style.left = '0px';
+                        confetti.style.top = startY + 'px';
+                        piece.style.animation = `confetti-side-left ${Math.random() * 3 + 2}s ease-out`;
+                    } else {
+                        confetti.style.right = '0px';
+                        confetti.style.top = startY + 'px';
+                        piece.style.animation = `confetti-side-right ${Math.random() * 3 + 2}s ease-out`;
+                    }
+                } else {
+                    // קונפטי מלמעלה (לטעינה)
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-20px';
+                    piece.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear`;
+                }
+
+                confetti.appendChild(piece);
+                document.body.appendChild(confetti);
+
+                // הסרת הקונפטי אחרי האנימציה
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, fromSides ? 5000 : 5000);
+            }
+        }
+
+        // יצירת חלקיקים מרחפים
+        function createParticles() {
+            const container = document.body;
+
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+
+                    // מיקום אקראי
+                    const posX = Math.random() * window.innerWidth;
+                    const posY = Math.random() * window.innerHeight;
+
+                    // גודל אקראי
+                    const size = Math.random() * 8 + 2;
+
+                    // צבע אקראי בגווני תכלת
+                    const hue = 175 + Math.random() * 10;
+                    const opacity = Math.random() * 0.5 + 0.1;
+
+                    particle.style.left = posX + 'px';
+                    particle.style.top = posY + 'px';
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+                    particle.style.background = `hsla(${hue}, 70%, 70%, ${opacity})`;
+
+                    // הגדרת אנימציה אקראית
+                    const duration = Math.random() * 10 + 5;
+                    const delay = Math.random() * 5;
+
+                    particle.style.animation = `float ${duration}s ease-in infinite ${delay}s`;
+
+                    container.appendChild(particle);
+                }, i * 200);
+            }
+        }
+
+        // אפקט מצביע קסום
+        function setupMagicCursor() {
+            const cursor = document.querySelector('.magic-cursor');
+
+            if (window.matchMedia('(pointer: fine)').matches) {
+                cursor.style.display = 'block';
+
+                document.addEventListener('mousemove', (e) => {
+                    cursor.style.left = e.clientX + 'px';
+                    cursor.style.top = e.clientY + 'px';
+                });
+
+                // הגדלת הסמן על מעבר מעל אלמנטים אינטראקטיביים
+                document.querySelectorAll('a, .update-item').forEach(item => {
+                    item.addEventListener('mouseenter', () => {
+                        cursor.style.width = '50px';
+                        cursor.style.height = '50px';
+                        cursor.style.borderColor = 'rgba(0, 128, 128, 0.8)';
+                    });
+
+                    item.addEventListener('mouseleave', () => {
+                        cursor.style.width = '30px';
+                        cursor.style.height = '30px';
+                        cursor.style.borderColor = 'rgba(0, 128, 128, 0.5)';
+                    });
+                });
+            }
+        }
+
+        // הוספת אפקט אור לעדכונים כשהם מופיעים במסך
+        function setupUpdatesAnimation() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.update-item').forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(30px)';
+                item.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+                observer.observe(item);
+            });
+        }
+
+        // הפעלת הפונקציות כאשר הדף נטען
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            setupMagicCursor();
+            setupUpdatesAnimation();
+
+            // קונפטי בטעינה הראשונה
+            setTimeout(() => {
+                createConfetti(false); // קונפטי מלמעלה
+            }, 500);
+
+            // קונפטי מהצדדים כל 15 דקות (900,000 מילישניות)
+            setInterval(() => {
+                createConfetti(true); // קונפטי מהצדדים
+            }, 900000);
+
+            // קונפטי נוסף מהצדדים אחרי 5 שניות מהטעינה הראשונה (לבדיקה)
+            setTimeout(() => {
+                createConfetti(true);
+            }, 5000);
+        });
+    </script>
+</body>
+
+</html>
